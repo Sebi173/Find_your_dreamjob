@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css_files %}
+    <link rel="stylesheet" href="{% static 'job_searcher/index.css' %}">
+    <link rel="stylesheet" href="{% static 'job_searcher/add_search_terms.css' %}">
+{% endblock %}
+
+{% block page_title %}
+{{ kind }}s
+{% endblock %}
+
+{% block content %}
+    <h1>All {{ kind }}s</h1>
+        <ul>
+            {% for data_point in data_points %}
+                <li>
+                    {{ data_point }}
+                </li>
+            {% endfor %}
+        </ul>
+    <h2>Add {{ kind }}</h2>
+    <form action="" method="POST">
+        {% csrf_token %}
+            {% for field in form %}
+                {{ field }}
+                {{ field.errors }}
+            {% endfor %}
+        <button type="submit">Submit</button>
+    </form>
+{% endblock %}

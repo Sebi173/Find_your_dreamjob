@@ -1,0 +1,14 @@
+{
+    "python.languageServer": "Pylance",
+    "emmet.includeLanguages": {
+        "django-html": "html"
+    },
+    "files.associations": {
+        "**/*.html": "html",
+        "**/templates/**/*.html": "django-html",
+        "**/templates/**/*": "django-txt",
+        "**/requirements{/**,*}.{txt,in}": "pip-requirements"
+    },
+    "html.suggest.html5": true,
+    "html.autoClosingTags": true
+}

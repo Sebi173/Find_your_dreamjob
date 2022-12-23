@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css_files %}
+    <link rel="stylesheet" href="{% static 'job_searcher/index.css' %}">
+{% endblock %}
+
+{% block page_title %}
+    {{job_info.job_title}}
+{% endblock %}
+
+{% block content %}
+<div>
+    <a href={{job_info.joblisting_url}} class="button">Link to the Jobpage</a>
+</div>
+<div id="job-detail-page">
+    {{ job_info.html_code | safe }}
+</div>
+{% endblock %}

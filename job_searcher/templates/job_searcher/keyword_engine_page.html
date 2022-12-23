@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css_files %}
+    <link rel="stylesheet" href="{% static 'job_searcher/index.css' %}">
+{% endblock %}
+
+{% block page_title %}
+    Keyword Job Searching Engine
+{% endblock %}
+
+{% block content %}
+    <div>
+        <h1>Choose your Keywords</h1>
+        <form action="" method="Post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    {% if jobs_list %}
+        <h1>Job Suggestions</h1>
+        <div id="job_listings">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Keywords</th>
+                        <th>Searchterms</th>
+                        <th>Place</th>
+                        <th>Language</th>
+                        <th>Score</th>
+                        <th>First Crawling Date</th>
+                        <th>ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for job in jobs_list %}
+                    <tr>
+                        <td><a href="{% url 'job-detail-page' job.id %}">{{job.job_title}}</a></td>
+                        <td>{{job.key_words}}</td>
+                        <td>{{job.search_terms}}</td>
+                        <td>{{job.job_location}}</td>
+                        <td>{{job.language}}</td>
+                        <td>{{job.score}}</td>
+                        <td>{{job.first_crawling_date}}</td>
+                        <td>{{job.id}}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,57 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'app.css' %}">
+    <title>{% block page_title %}{% endblock %}</title>
+    {% block css_files %}{% endblock %}
+</head>
+
+<body>
+    <div id="header">
+        <header>
+            <nav>
+                <div class="header_search_engines">
+                    <ul>
+                        <li>
+                            <a href="{% url 'home-page' %}">Home</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'keyword-engine-page' %}">Keyword Job Searching Engine</a>
+                        </li>
+                        <li>
+                            <a href="">Advanced Job Searching Engine</a>
+                        </li>
+                        <li>
+                            <a href="">Comparing Job Searching Engine</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="header_login">
+                    <ul>
+                        <li>
+                            <a href="{% url 'add-search-terms-page' %}">Add Search Terms</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'add-keywords-page' %}">Add Keywords</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'activate-crawler-page' %}">Activate Crawler</a>
+                        </li>
+                        <li>
+                            <a href="">Login</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+    </div>
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

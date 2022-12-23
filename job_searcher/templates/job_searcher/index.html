@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css_files %}
+    <link rel="stylesheet" href="{% static 'job_searcher/job_list.css' %}">
+{% endblock %}
+
+{% block page_title %}
+Find your Dream Job
+{% endblock %}
+
+{% block content %}
+    <div id="job_listings">
+        <h1>
+            All Job Listings
+        </h1>
+        <ul>
+            {% for job in job_list %}
+                <li>
+                    <a href="{% url 'job-detail-page' job.id %}">
+                        {{ job.job_title }}
+                    </a>
+                </li>  
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
