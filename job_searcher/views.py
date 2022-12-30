@@ -1,7 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import DetailView, ListView, CreateView, View
-from django.db import IntegrityError
 from django.http import HttpResponseRedirect
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 from datetime import date
 import time
@@ -25,7 +25,15 @@ class JobDetailView(DetailView):
     template_name = "job_searcher/job_detail_page.html"
     context_object_name = "job_info"
 
-class AddSearchTermsView(CreateView):
+class NotLoggedInView(View):
+    def get(self, request):
+        return render(request, "job_searcher/not_logged_in_page.html")
+
+class NotAStaffView(View):
+    def get(self, request):
+        return render(request, "job_searcher/not_a_staff_page.html")
+
+class AddSearchTermsView(LoginRequiredMixin, CreateView):
     model = SearchTerm
     template_name = "job_searcher/add_keywords_or_search_terms_page.html"
     fields = "__all__"
@@ -38,32 +46,7 @@ class AddSearchTermsView(CreateView):
         context['kind'] = "Searchterm"
         return context
 
-class PingJobsitesView(View):
-    def get(self, request):
-        return render(request, "job_searcher/ping_jobsites_page.html")
-    def post(self, request):
-        jobs = Job.objects.all()
-        today = date.today()
-        for job in jobs:
-            status_code = ping_url(job.joblisting_url)
-            print(f"{status_code}: {job.joblisting_url}")
-            if status_code == 200:
-                job.is_active = True
-                job.last_crawling_date = today
-            else:
-                print(f"{job.job_title} ({job.company})")
-                job.is_active = False
-                job.last_crawling_date = today
-
-            try:
-                job.save()
-            except:
-                continue
-            
-
-        return render(request, "job_searcher/ping_jobsites_page.html")
-
-class AddKeywordsView(CreateView):
+class AddKeywordsView(LoginRequiredMixin, CreateView):
     model = KeyWord
     template_name = "job_searcher/add_keywords_or_search_terms_page.html"
     fields = "__all__"
@@ -84,6 +67,37 @@ class AddKeywordsView(CreateView):
         for job_data in jobs_data:
             job_data.key_words.add(key_word)
         return HttpResponseRedirect(self.get_success_url())
+
+class PingJobsitesView(UserPassesTestMixin, View):
+    def get(self, request):
+        return render(request, "job_searcher/ping_jobsites_page.html")
+
+    def post(self, request):
+        jobs = Job.objects.all()
+        today = date.today()
+        for job in jobs:
+            status_code = ping_url(job.joblisting_url)
+            print(f"{status_code}: {job.joblisting_url}")
+            if status_code == 200:
+                job.is_active = True
+                job.last_crawling_date = today
+            else:
+                print(f"{job.job_title} ({job.company})")
+                job.is_active = False
+                job.last_crawling_date = today
+
+            try:
+                job.save()
+            except:
+                continue
+
+        return render(request, "job_searcher/ping_jobsites_page.html")
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def handle_no_permission(self):
+        return redirect('not-a-staff-page')
 
 class KeywordEngineView(CreateView):
     model = UserRequest
@@ -123,15 +137,15 @@ class KeywordEngineView(CreateView):
             
             list_jobs_with_scores.append(job_dic)
 
-        list_top_50_jobs = sort_top_50_jobs(list_jobs_with_scores)
+        list_top_jobs = sort_top_50_jobs(list_jobs_with_scores)
 
         context = self.get_context_data(form=form)
-        context['jobs_list'] = list_top_50_jobs
+        context['jobs_list'] = list_top_jobs[:200]
 
         return self.render_to_response(context=context)
 
 
-class ActivateCrawlerView(View):
+class ActivateCrawlerView(UserPassesTestMixin, View):
     def get(self, request):
         return render(request, "job_searcher/activate_crawler_page.html")
 
@@ -208,3 +222,9 @@ class ActivateCrawlerView(View):
                     print(f"{round(time.time() - start_time, 2)} seconds have passed.")
 
             return render(request, "job_searcher/activate_crawler_page.html")
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def handle_no_permission(self):
+        return redirect('not-a-staff-page')

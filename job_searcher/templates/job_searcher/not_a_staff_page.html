@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css_files %}
+{% endblock %}
+
+{% block page_title %}
+No Permission
+{% endblock %}
+
+{% block content %}
+    <h1>Not a Staff User</h1>
+    <p>You must be a Staff User to see this page!</p>
+    <p>{{ test_func }}</p>
+{% endblock %}

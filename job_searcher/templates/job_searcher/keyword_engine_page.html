@@ -16,13 +16,13 @@
             {% csrf_token %}
             {{ form.as_p }}
             <label for="place">Place:</label>
-            <input type="text" id="place" name="place">
+            <input type="text" id="place" name="place"><br>
             <button type="submit">Submit</button>
         </form>
     </div>
     {% if jobs_list %}
         <h1>Job Suggestions</h1>
-        <div id="job_listings">
+        <div id="job_listings" class="table table-bordered table-striped">
             <table>
                 <thead>
                     <tr>
