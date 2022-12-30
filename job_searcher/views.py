@@ -9,6 +9,7 @@ from random import randint
 
 from .functions.jobscout24.crawler import find_jobsites, Crawler
 from .functions.utility.top_50_jobs import sort_top_50_jobs
+from .functions.utility.ping_url import ping_url
 
 from .models import Job, KeyWord, SearchTerm, RawJob, UserRating, UserRequest
 
@@ -36,6 +37,31 @@ class AddSearchTermsView(CreateView):
         context['data_points'] = search_terms
         context['kind'] = "Searchterm"
         return context
+
+class PingJobsitesView(View):
+    def get(self, request):
+        return render(request, "job_searcher/ping_jobsites_page.html")
+    def post(self, request):
+        jobs = Job.objects.all()
+        today = date.today()
+        for job in jobs:
+            status_code = ping_url(job.joblisting_url)
+            print(f"{status_code}: {job.joblisting_url}")
+            if status_code == 200:
+                job.is_active = True
+                job.last_crawling_date = today
+            else:
+                print(f"{job.job_title} ({job.company})")
+                job.is_active = False
+                job.last_crawling_date = today
+
+            try:
+                job.save()
+            except:
+                continue
+            
+
+        return render(request, "job_searcher/ping_jobsites_page.html")
 
 class AddKeywordsView(CreateView):
     model = KeyWord
@@ -73,6 +99,8 @@ class KeywordEngineView(CreateView):
             jobs = jobs.filter(key_words__in=key_words)
         else:
             jobs = Job.objects.filter(key_words__in=key_words)
+        if data["place"] != "":
+            jobs = jobs.filter(job_location__contains=data["place"])
         jobs = jobs.filter(is_active=True).distinct()
         list_jobs = jobs.values("id", "job_title", "job_location", "joblisting_url", "language", "first_crawling_date")
         list_jobs_with_scores = []
@@ -81,11 +109,14 @@ class KeywordEngineView(CreateView):
             job_dic = list_jobs[i]
             set_key_words = set(key_words.values_list("key_word", flat=True))
             list_job_key_words = list(job.key_words.all().values_list("key_word", flat=True))
-            set_search_terms = set(search_terms.values_list("search_term", flat=True))
-            list_job_search_terms = list(job.search_terms.all().values_list("search_term", flat=True))
+            if data.get("search_terms"):
+                set_search_terms = set(search_terms.values_list("search_term", flat=True))
+                list_job_search_terms = list(job.search_terms.all().values_list("search_term", flat=True))
+                job_dic['search_terms'] = list(set.intersection(set_search_terms, set(list_job_search_terms)))
+            else:
+                job_dic['search_terms'] = ""
             job_dic['score'] = 0
             job_dic['key_words'] = list(set.intersection(set_key_words, set(list_job_key_words)))
-            job_dic['search_terms'] = list(set.intersection(set_search_terms, set(list_job_search_terms)))
             for key_word in key_words:
                 if key_word in job.key_words.all():
                     job_dic['score'] += 1
@@ -102,7 +133,7 @@ class KeywordEngineView(CreateView):
 
 class ActivateCrawlerView(View):
     def get(self, request):
-        return render(request, "job_searcher/activate-crawler-page.html")
+        return render(request, "job_searcher/activate_crawler_page.html")
 
     def post(self, request):
         if 'activate_crawler' in request.POST:
@@ -141,22 +172,13 @@ class ActivateCrawlerView(View):
                             job_data.save()
                             known_joblisting_ids.append(dic_job_data.get("joblisting_url"))
 
-                        except IntegrityError:
-                            print("IntegrityError")
-
+                        except:
                             if job_data.joblisting_id not in known_joblisting_ids:
-                                print("Added to RawJobs")
                                 try:
                                     raw_job_data.save()
-                                except IntegrityError:
-                                    pass
-
-                        except:
-                            print('Crawl failed')
-                            try:
-                                raw_job_data.save()
-                            except IntegrityError:
-                                pass
+                                    print("Added to RawJobs")
+                                except Exception as e:
+                                    print(e)
 
 
                         #Waiting until the database has saved our new entry
@@ -185,4 +207,4 @@ class ActivateCrawlerView(View):
 
                     print(f"{round(time.time() - start_time, 2)} seconds have passed.")
 
-            return render(request, "job_searcher/activate-crawler-page.html")
+            return render(request, "job_searcher/activate_crawler_page.html")
