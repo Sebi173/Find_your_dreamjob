@@ -12,6 +12,7 @@ from .functions.utility.top_50_jobs import sort_top_50_jobs
 from .functions.utility.ping_url import ping_url
 
 from .models import Job, KeyWord, SearchTerm, RawJob, UserRating, UserRequest
+from .forms import AddKeywordForm, AddSearchtermForm
 
 # Create your views here.
 
@@ -36,8 +37,8 @@ class NotAStaffView(View):
 class AddSearchTermsView(LoginRequiredMixin, CreateView):
     model = SearchTerm
     template_name = "job_searcher/add_keywords_or_search_terms_page.html"
-    fields = "__all__"
-    success_url = "add-search-terms"
+    form_class = AddSearchtermForm
+    success_url = "/add-search-terms/"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -46,11 +47,22 @@ class AddSearchTermsView(LoginRequiredMixin, CreateView):
         context['kind'] = "Searchterm"
         return context
 
+    def form_valid(self, form):
+        
+        if "search_term" not in self.request.POST:
+            if "delete" in self.request.POST:
+                id = self.request.POST["delete"]
+                search_term = SearchTerm.objects.get(pk=id)
+                print(search_term)
+                search_term.delete()
+            return redirect("/add-search-terms/")
+        return super().form_valid(form)
+
 class AddKeywordsView(LoginRequiredMixin, CreateView):
     model = KeyWord
     template_name = "job_searcher/add_keywords_or_search_terms_page.html"
-    fields = "__all__"
-    success_url = "add-keywords"
+    form_class = AddKeywordForm
+    success_url = "/add-keywords/"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -59,8 +71,14 @@ class AddKeywordsView(LoginRequiredMixin, CreateView):
         context['kind'] = "Keyword"
         return context
 
-
     def form_valid(self, form):
+        if "key_word" not in self.request.POST:
+            if "delete" in self.request.POST:
+                id = self.request.POST["delete"]
+                key_word = KeyWord.objects.get(pk=id)
+                print(key_word)
+                key_word.delete()
+            return redirect("/add-keywords/")
         self.object = form.save()
         jobs_data = Job.objects.filter(job_description__contains=self.request.POST['key_word'].lower())
         key_word = KeyWord.objects.get(key_word=self.request.POST['key_word'])

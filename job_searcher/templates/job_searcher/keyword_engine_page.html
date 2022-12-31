@@ -14,9 +14,17 @@
         <h1>Choose your Keywords</h1>
         <form action="" method="Post">
             {% csrf_token %}
-            {{ form.as_p }}
-            <label for="place">Place:</label>
-            <input type="text" id="place" name="place"><br>
+            <table>
+                {{ form }}
+                <tr>
+                    <th>
+                        Place:
+                    </th>
+                    <td>
+                        <input type="text" id="place" name="place">
+                    </td>
+                </tr>
+            </table> <br>
             <button type="submit">Submit</button>
         </form>
     </div>
@@ -33,7 +41,6 @@
                         <th>Language</th>
                         <th>Score</th>
                         <th>First Crawling Date</th>
-                        <th>ID</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,7 +53,6 @@
                         <td>{{job.language}}</td>
                         <td>{{job.score}}</td>
                         <td>{{job.first_crawling_date}}</td>
-                        <td>{{job.id}}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

@@ -2,6 +2,27 @@
 
 {% block content %}
 
-<h1>Your Logout was successful!</h1>
+{% if user.is_authenticated %}
+<form method="post">
+    {% csrf_token %}
+    <input type="submit" name="logout" value="Press here to Logout!" />
+</form>
+
+{% else %}
+
+<h1>You are not logged in!</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="submit" name="login" value="Press here to Login!" />
+</form> <br>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="submit" name="register" value="Press here to Register!" />
+</form>
+
+
+{% endif %}
 
 {% endblock %}
