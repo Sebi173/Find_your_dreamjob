@@ -2,14 +2,17 @@
 {% load static %}
 
 {% block css_files %}
+    <link rel="stylesheet" href="{% static 'job_searcher/index.css' %}">
 {% endblock %}
 
 {% block page_title %}
-No Permission
+Not Logged in
 {% endblock %}
 
 {% block content %}
-    <h1>Not Logged in</h1>
-    <p>You must be logged in to see this page!</p>
-    <p>{{ test_func }}</p>
+    <div class="main-content">
+        <h1>Not Logged in</h1>
+        <p>You must be logged in to see this page!</p>
+        <p>{{ test_func }}</p>
+    </div>
 {% endblock %}

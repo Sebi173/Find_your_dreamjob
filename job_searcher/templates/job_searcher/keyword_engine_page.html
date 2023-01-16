@@ -10,24 +10,33 @@
 {% endblock %}
 
 {% block content %}
-    <div>
-        <h1>Choose your Keywords</h1>
-        <form action="" method="Post">
-            {% csrf_token %}
-            <table>
-                {{ form }}
-                <tr>
-                    <th>
-                        Place:
-                    </th>
-                    <td>
-                        <input type="text" id="place" name="place">
-                    </td>
-                </tr>
-            </table> <br>
-            <button type="submit">Submit</button>
-        </form>
-    </div>
+    <div class="main-content">
+        <div>
+            <h1>Choose your Keywords</h1>
+            <form action="" method="Post">
+                {% csrf_token %}
+                <table>
+                    {{ form }}
+                    <tr>
+                        <th>
+                            Place:
+                        </th>
+                        <td>
+                            <input type="text" id="place" name="place">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Date (after):
+                        </th>
+                        <td>
+                            <input type="date" id="date" name="date">
+                        </td>
+                    </tr>
+                </table> <br>
+                <button type="submit">Submit</button>
+            </form>          
+        </div>
     {% if jobs_list %}
         <h1>Job Suggestions</h1>
         <div id="job_listings" class="table table-bordered table-striped">
@@ -58,5 +67,6 @@
                 </tbody>
             </table>
         </div>
+    </div>
     {% endif %}
 {% endblock %}

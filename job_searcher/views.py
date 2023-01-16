@@ -12,7 +12,7 @@ from .functions.utility.top_50_jobs import sort_top_50_jobs
 from .functions.utility.ping_url import ping_url
 
 from .models import Job, KeyWord, SearchTerm, RawJob, UserRating, UserRequest
-from .forms import AddKeywordForm, AddSearchtermForm
+from .forms import AddKeywordForm, AddSearchtermForm, UserRatingForm
 
 # Create your views here.
 
@@ -21,10 +21,44 @@ class HomeView(ListView):
     template_name = "job_searcher/index.html"
     context_object_name = "job_list"
 
-class JobDetailView(DetailView):
+    def get_context_data(self, **kwargs):
+        latest_crawling_date = Job.objects.latest("pk").first_crawling_date
+        context = super().get_context_data(**kwargs)
+        context['job_list'] = Job.objects.filter(first_crawling_date=latest_crawling_date)
+        return context
+
+""" class JobDetailView(DetailView):
     model = Job
     template_name = "job_searcher/job_detail_page.html"
     context_object_name = "job_info"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = UserRatingForm
+        print(context)
+        return context """
+
+class JobDetailView(View):
+
+    def get(self, request, pk):
+        job = Job.objects.get(id=pk)
+        return render(request, "job_searcher/job_detail_page.html", {
+            "job": job,
+            "form": UserRatingForm
+        })
+
+    def post(self, request, pk):
+        job = Job.objects.get(id=pk)
+        rating = request.POST['rating']
+        user_rating = UserRating(job=job, rating=rating, user=request.user)
+        try:
+            user_rating.save()
+        except:
+            UserRating.objects.filter(job=job, user=request.user).update(rating=rating)
+        return render(request, "job_searcher/job_detail_page.html", {
+            "job": job,
+            "form": UserRatingForm
+        }) 
 
 class NotLoggedInView(View):
     def get(self, request):
@@ -133,6 +167,8 @@ class KeywordEngineView(CreateView):
             jobs = Job.objects.filter(key_words__in=key_words)
         if data["place"] != "":
             jobs = jobs.filter(job_location__contains=data["place"])
+        if data["date"] != "":
+            jobs = jobs.filter(first_crawling_date=data["date"])
         jobs = jobs.filter(is_active=True).distinct()
         list_jobs = jobs.values("id", "job_title", "job_location", "joblisting_url", "language", "first_crawling_date")
         list_jobs_with_scores = []
@@ -191,42 +227,41 @@ class ActivateCrawlerView(UserPassesTestMixin, View):
                         time.sleep(randint(0,3))
                         crawled_data = Crawler(dic_job_data.get("joblisting_url"))
 
-                        job_data = Job(company=crawled_data.company_title, is_active=True, job_description=crawled_data.job_description, job_location=crawled_data.job_location,
+
+                        try:
+                            job_data_saved = Job.objects.create(company=crawled_data.company_title, is_active=True, job_description=crawled_data.job_description, job_location=crawled_data.job_location,
                             job_site=dic_job_data.get("job_site"), job_title=crawled_data.job_title, joblisting_id=dic_job_data.get("joblisting_id"), first_crawling_date=today,
                             last_crawling_date=today, language = crawled_data.language, joblisting_url=dic_job_data.get("joblisting_url"), html_code=crawled_data.job_description_soup)
 
-                        raw_job_data = RawJob(
-                                company=crawled_data.company_title, is_active=True, job_description=crawled_data.job_description, job_location=crawled_data.job_location, 
-                                job_site=dic_job_data.get("job_site"), job_title=crawled_data.job_title, joblisting_id=dic_job_data.get("joblisting_id"), first_crawling_date=today,
-                                last_crawling_date=today, language = crawled_data.language, joblisting_url=dic_job_data.get("joblisting_url"), html_code=crawled_data.job_description_soup)
+
+                            known_joblisting_ids.append(dic_job_data.get("joblisting_id"))
+
+                        except Exception as e1:
+                            if job_data_saved.joblisting_id not in known_joblisting_ids:
+                                try:
+                                    RawJob.objects.create(
+                                    company=crawled_data.company_title, is_active=True, job_description=crawled_data.job_description, job_location=crawled_data.job_location, 
+                                    job_site=dic_job_data.get("job_site"), job_title=crawled_data.job_title, joblisting_id=dic_job_data.get("joblisting_id"), first_crawling_date=today,
+                                    last_crawling_date=today, language = crawled_data.language, joblisting_url=dic_job_data.get("joblisting_url"), html_code=crawled_data.job_description_soup)
+
+                                    print("Added to RawJobs")
+                                except Exception as e2:
+                                    print(e2)
+                            else:
+                                job_data_saved = Job.objects.get(joblisting_id=job_data_saved.joblisting_id)
 
                         try:
-                            job_data.save()
-                            known_joblisting_ids.append(dic_job_data.get("joblisting_url"))
+                            job_data_saved.search_terms.add(search_term)
 
-                        except:
-                            if job_data.joblisting_id not in known_joblisting_ids:
-                                try:
-                                    raw_job_data.save()
-                                    print("Added to RawJobs")
-                                except Exception as e:
-                                    print(e)
-
-
-                        #Waiting until the database has saved our new entry
-                        was_received_by_db = False
-
-                        while was_received_by_db == False:
-                            time.sleep(0.05)
-                            if int(job_data.joblisting_id) in Job.objects.values_list("joblisting_id", flat=True):
-                                job_data = Job.objects.get(joblisting_id=job_data.joblisting_id)
-                                job_data.search_terms.add(search_term)
-                                was_received_by_db = True
-
-                        #Adding the matching Keywords to the new entry
-                        for key_word in key_words:
-                            if key_word.key_word.lower() in job_data.job_description:
-                                job_data.key_words.add(key_word)
+                            #Adding the matching Keywords to the new entry
+                            for key_word in key_words:
+                                if key_word.key_word.lower() in job_data_saved.job_description:
+                                    job_data_saved.key_words.add(key_word)
+                                
+                            job_data_saved.save()
+                        
+                        except Exception as e:
+                            print(e)
                                 
 
                     else:

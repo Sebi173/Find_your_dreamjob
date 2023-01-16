@@ -129,6 +129,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "/not-logged-in/"
 
-LOGIN_REDIRECT_URL = "/user/profile/"
+LOGIN_REDIRECT_URL = "/"
 
 LOGOUT_REDIRECT_URL = "/user/logout"

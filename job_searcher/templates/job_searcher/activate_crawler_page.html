@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block css_files %}
-    <link rel="stylesheet" href="{% static 'job_searcher/job_list.css' %}">
+    <link rel="stylesheet" href="{% static 'job_searcher/index.css' %}">
 {% endblock %}
 
 {% block page_title %}
@@ -10,9 +10,11 @@ Activate Crawler
 {% endblock %}
 
 {% block content %}
-    <h1>Activate Crawler</h1>
-        <form method="POST">
-            {% csrf_token %}
-            <button type="submit" name="activate_crawler">Go</button>
-        </form>
+    <div class="main-content">
+        <h1>Activate Crawler</h1>
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" name="activate_crawler">Go</button>
+            </form>
+    </div>
 {% endblock %}

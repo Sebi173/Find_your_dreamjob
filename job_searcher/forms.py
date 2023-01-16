@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import KeyWord, SearchTerm
+from .models import KeyWord, SearchTerm, UserRating
 
 class AddKeywordForm(forms.ModelForm):
     
@@ -22,4 +22,11 @@ class AddSearchtermForm(forms.ModelForm):
     class Meta:
         model = SearchTerm
         fields = ["search_term"]
+
+
+class UserRatingForm(forms.ModelForm):
+
+    class Meta:
+        model = UserRating
+        fields = ["rating"]
 

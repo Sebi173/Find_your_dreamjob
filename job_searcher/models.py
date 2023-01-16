@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator,MaxValueValidator
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -54,8 +55,12 @@ class RawJob(models.Model):
         return f"{self.job_title} at {self.company}"
 
 class UserRating(models.Model):
-    job = models.OneToOneField(Job, on_delete=models.CASCADE)
+    job = models.ForeignKey(Job, on_delete=models.CASCADE)
     rating = models.IntegerField(validators = [MinValueValidator(1), MaxValueValidator(10)])
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("job", "user")
 
     def __str__(self):
         return f"{self.job} (Rating: {self.rating})"

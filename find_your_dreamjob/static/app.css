@@ -1,17 +1,27 @@
+:root {
+    --primary-color: #E7E8D1;
+    --secondary-color: #A7BEAE;
+    --secondary-color-dark: #6e7c72;
+    --tertiary-color: #B85042;
+    --link-color: #B85042;
+    --hover-link-color: black;
+}
+
+
 body {
-    background-color: #28334AFF;
+    background-color: var(--primary-color);
     display: grid;
-    grid-template-rows: 60px auto 200px;
-    grid-template-columns: 40px auto 40px;
+    grid-auto-rows: 200px;
+    grid-template-rows: 50px auto 200px;
+    align-items: center;
 }
 
 
 header {
-    background: #FBDE44FF;
+    background: var(--secondary-color);
 }
 
 #header {
-    grid-column: 1 / 4;
     grid-row: 1 / 2;
 }
 
@@ -36,15 +46,16 @@ header li {
 }
 
 .content {
-    grid-row: 2 / 3;
-    grid-column: 2 / 3;
-    justify-self: center;
+    display: grid;
+    grid-template-columns: 0.7fr 2.5fr 1fr;
 }
 
 .footer {
     display: grid;
     grid-row: 3 / 4;
-    grid-column: 1 / 4;
+    grid-template-columns: 1fr 1fr 1fr;
+    justify-items: stretch;
+    align-items: stretch;
 }
 
 .footer ul {
@@ -56,17 +67,15 @@ header li {
 }
 
 .contact {
-    grid-row: 3 / 4;
     grid-column: 1 / 2;
 }
 
 .social-media {
-    grid-row: 3 / 4;
-    grid-column: 3 / 4;
+    grid-column: 3 / -1;
 }
 
 h1,
 h2,
 h3 {
-    color: #FBDE44FF
+    color: var(--secondary-color-dark)
 }

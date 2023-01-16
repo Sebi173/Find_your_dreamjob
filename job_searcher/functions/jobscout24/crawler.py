@@ -55,16 +55,22 @@ class Crawler:
 
         self.job_url = job_url
         self.main_url = 'https://www.jobscout24.ch/de/jobs/'
-        self.job_description, self.job_title, self.company_title, self.job_location, self.job_description_soup, self.language  = self.crawl_url()
+        try:
+            self.job_description, self.job_title, self.company_title, self.job_location, self.job_description_soup, self.language  = self.crawl_url()
+        except:
+            self.job_description, self.job_title, self.company_title, self.job_location, self.job_description_soup, self.language = None
 
     def crawl_url(self):
 
-        reqs = requests.get(self.job_url)
-        soup = BeautifulSoup(reqs.text, 'html.parser')
-        job_description_soup = soup.find('div', {'class': 'job-description'})
-        job_title_soup = soup.find('div', {'class': 'title-left-part'})
-        company_title_soup = soup.find('h2', {'class': 'company-title'})
-        job_location_soup = soup.find(['a', 'span'], {'class': 'company-location'})        
+        try:
+            reqs = requests.get(self.job_url)
+            soup = BeautifulSoup(reqs.text, 'html.parser')
+            job_description_soup = soup.find('div', {'class': 'job-description'})
+            job_title_soup = soup.find('div', {'class': 'title-left-part'})
+            company_title_soup = soup.find('h2', {'class': 'company-title'})
+            job_location_soup = soup.find(['a', 'span'], {'class': 'company-location'})        
+        except Exception as e:
+            print(e)
             
         try:
             job_description = job_description_soup.get_text().lower()

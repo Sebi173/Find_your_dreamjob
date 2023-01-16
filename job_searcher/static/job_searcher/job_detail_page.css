@@ -1,0 +1,29 @@
+#job-detail {
+    margin: 0 30px 0 30px;
+    border-radius: 3px;
+    background-color: var(--tertiary-color);
+    box-shadow: 0 2px 8px rgb(0, 0, 0, 0.5);
+    padding: 5px 2px 5px 2px;
+    grid-column: 2 / 3;
+}
+
+#job-detail li {
+    list-style: none;
+}
+
+.job-details-top {
+    text-align: center;
+}
+
+#marketing {
+    grid-column: 3 / -1;
+    text-align: left;
+}
+
+#joblisting-url {
+    grid-column: 1 / 2;
+}
+
+.user-rating {
+    margin-bottom: 15px;
+}

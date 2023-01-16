@@ -3,6 +3,7 @@
 
 {% block css_files %}
     <link rel="stylesheet" href="{% static 'job_searcher/index.css' %}">
+    <link rel="stylesheet" href="{% static 'job_searcher/job_detail_page.css' %}">
 {% endblock %}
 
 {% block page_title %}
@@ -10,10 +11,23 @@
 {% endblock %}
 
 {% block content %}
-<div>
-    <a href={{job_info.joblisting_url}} class="button">Link to the Jobpage</a>
-</div>
-<div id="job-detail-page">
-    {{ job_info.html_code | safe }}
-</div>
+    <div id="joblisting-url">
+        <div class="user-rating">
+            <h1>How much do you like this Job Opportunity?</h1>
+            <form method="Post">  
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div>
+            <a href={{job.joblisting_url}} class="button" target="_blank">Link to the Jobpage</a>
+        </div>
+    </div>
+    <div id="job-detail">
+        {{ job.html_code | safe }}
+    </div>
+    <div id="marketing">
+        <h1>Hier könnte ihre Werbung stehen.</h1>
+    </div>
 {% endblock %}
